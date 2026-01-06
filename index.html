@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- SECURITY: Content Security Policy (CSP) 
+         - default-src 'self': Only allow resources from the same origin
+         - style-src 'self': Only allow local CSS (no external styles)
+         - script-src 'self': Only allow local scripts (no inline scripts or external exploits)
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:;"
+    />
+    <title>Calendrier Interactif</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" defer src="script.js"></script>
+  </head>
+  <body>
+    <h1>Calendrier de l'équipe</h1>
+
+    <div id="controls">
+      <label for="datePicker">Choisir un mois :</label>
+      <input type="month" id="datePicker" />
+    </div>
+
+    <!-- Container for the person selector -->
+    <div id="legend"></div>
+
+    <div id="calendar"></div>
+  </body>
+</html>

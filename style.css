@@ -1,0 +1,143 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+#controls {
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input[type="month"] {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input[type="month"]:focus {
+    border-color: #007BFF;
+}
+
+/* --- Legend / Person Selector --- */
+#legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.legend-item:hover {
+    opacity: 0.8;
+    background-color: rgba(0,0,0,0.05);
+}
+
+.legend-item.active {
+    opacity: 1;
+    transform: translateY(-2px);
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    border: 2px solid rgba(0,0,0,0.1);
+}
+
+/* --- Calendar Grid --- */
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    gap: 8px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.day-header {
+    font-weight: 600;
+    text-align: center;
+    color: #555;
+    padding: 8px 0;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+
+.day-cell {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.day-cell:hover {
+    background-color: #e9ecef;
+    transform: scale(1.05);
+}
+
+.empty-cell {
+    background-color: transparent;
+    cursor: default;
+}
+
+/* --- Person Colors --- */
+/* Sylvie - Rose/Red */
+.bg-sylvie { background-color: #ffadad !important; color: #5c0000; border-color: #ff4d4d; }
+.swatch-sylvie { background-color: #ffadad; }
+
+/* Evelyne - Blue */
+.bg-evelyne { background-color: #9bf6ff !important; color: #004a52; border-color: #00b4d8; }
+.swatch-evelyne { background-color: #9bf6ff; }
+
+/* Françoise - Green */
+.bg-francoise { background-color: #caffbf !important; color: #1b4d00; border-color: #70e000; }
+.swatch-francoise { background-color: #caffbf; }
+
+/* Marie-Claire - Orange/Yellow */
+.bg-marie-claire { background-color: #ffd6a5 !important; color: #663c00; border-color: #ff9f1c; }
+.swatch-marie-claire { background-color: #ffd6a5; }
+
+/* Nathalie - Purple */
+.bg-nathalie { background-color: #bdb2ff !important; color: #2d0059; border-color: #7209b7; }
+.swatch-nathalie { background-color: #bdb2ff; }
