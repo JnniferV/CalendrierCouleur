@@ -27,3 +27,8 @@ create index on comments (day);
 alter table people enable row level security;
 alter table allocations enable row level security;
 alter table comments enable row level security;
+
+-- Droits minimaux du rôle de la clé secrète (la RLS ne remplace pas les droits sur les tables)
+grant select on people to service_role;
+grant select, insert, update, delete on allocations to service_role;
+grant select, insert on comments to service_role;

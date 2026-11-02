@@ -5,7 +5,7 @@ export class Calendar {
     [this.datePicker, this.calendarDiv, this.legendDiv, this.form, this.commentsList] =
       [datePickerId, calendarId, legendId, formId, commentsId].map((id) => document.getElementById(id))
 
-    this.people = null // Map id -> {id, name, color}, chargée une seule fois
+    this.people = new Map() // id -> {id, name, color}, chargée une seule fois
     this.selectedPerson = null
     this.allocations = {} // "YYYY-MM-DD" -> personId
     this.comments = []
@@ -15,6 +15,7 @@ export class Calendar {
     this.datePicker.addEventListener('input', () => this.load())
     this.form.day.addEventListener('input', () => this.renderCalendar())
     this.form.addEventListener('submit', (e) => this.addComment(e))
+    this.renderCalendar() // les jours s'affichent sans attendre la base
     this.load()
   }
 
@@ -34,13 +35,14 @@ export class Calendar {
     try {
       const data = await (await this.request(`/api/month/${month}`)).json()
       if (month !== this.datePicker.value) return // réponse périmée (mois changé entre-temps)
-      this.people ??= this.initPeople(data.people)
+      if (!this.people.size) this.people = this.initPeople(data.people)
       this.allocations = data.allocations
       this.comments = data.comments
       this.renderCalendar()
       this.renderComments()
     } catch (e) {
       console.error('Chargement impossible :', e)
+      this.commentsList.replaceChildren(this.el('li', 'comment', 'Base de données injoignable : données non chargées.'))
     }
   }
 
