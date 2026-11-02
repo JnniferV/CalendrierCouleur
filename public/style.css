@@ -79,7 +79,7 @@ input[type="month"]:focus {
 /* --- Calendar Grid --- */
 #calendar {
     display: grid;
-    grid-template-columns: repeat(7, 60px);
+    grid-template-columns: repeat(7, minmax(0, 60px));
     gap: 8px;
     background: white;
     padding: 20px;
@@ -98,7 +98,7 @@ input[type="month"]:focus {
 }
 
 .day-cell {
-    height: 60px;
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,23 +121,71 @@ input[type="month"]:focus {
     cursor: default;
 }
 
-/* --- Person Colors --- */
-/* Sylvie - Rose/Red */
-.bg-sylvie { background-color: #ffadad !important; color: #5c0000; border-color: #ff4d4d; }
-.swatch-sylvie { background-color: #ffadad; }
 
-/* Evelyne - Blue */
-.bg-evelyne { background-color: #9bf6ff !important; color: #004a52; border-color: #00b4d8; }
-.swatch-evelyne { background-color: #9bf6ff; }
+.day-cell.selected {
+    outline: 2px solid #2c3e50;
+}
 
-/* Françoise - Green */
-.bg-francoise { background-color: #caffbf !important; color: #1b4d00; border-color: #70e000; }
-.swatch-francoise { background-color: #caffbf; }
+/* --- Comments --- */
+#commentForm, #comments {
+    width: 100%;
+    max-width: 508px;
+    box-sizing: border-box;
+}
 
-/* Marie-Claire - Orange/Yellow */
-.bg-marie-claire { background-color: #ffd6a5 !important; color: #663c00; border-color: #ff9f1c; }
-.swatch-marie-claire { background-color: #ffd6a5; }
+#commentForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 20px;
+}
 
-/* Nathalie - Purple */
-.bg-nathalie { background-color: #bdb2ff !important; color: #2d0059; border-color: #7209b7; }
-.swatch-nathalie { background-color: #bdb2ff; }
+#commentForm textarea, #commentForm button {
+    grid-column: 1 / -1;
+}
+
+#commentForm > * {
+    padding: 8px;
+    font: inherit;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#commentForm button {
+    background: #2c3e50;
+    color: white;
+    cursor: pointer;
+}
+
+#comments {
+    list-style: none;
+    padding: 0;
+}
+
+.comment {
+    background: white;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.comment-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.comment-head .color-swatch {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+}
+
+.comment p {
+    margin: 6px 0 0;
+    white-space: pre-line;
+}

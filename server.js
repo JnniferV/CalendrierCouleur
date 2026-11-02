@@ -1,90 +1,62 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+import express from 'express'
+import path from 'node:path'
+import { supabase } from './db.js'
 
-const app = express();
-const PORT = process.env.PORT || 3000; // Use environment port for Hostinger or 3000 default
-const DATA_FILE = path.join(__dirname, 'allocations.json');
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/
 
-// Middleware
-app.use(cors()); 
-app.use(express.json());
+const app = express()
+app.disable('x-powered-by')
+app.use(express.json({ limit: '4kb' })) // n'accepte que application/json : bloque les formulaires envoyés depuis un autre site
+app.use(express.static(path.join(import.meta.dirname, 'public')))
 
-// --- SECURITY & STATIC FILES ---
+app.get('/api/month/:month', async (req, res) => {
+  const { month } = req.params
+  if (!MONTH.test(month)) return res.sendStatus(400)
+  const [year, monthNumber] = month.split('-').map(Number)
+  const nextMonth = new Date(Date.UTC(year, monthNumber, 1)).toISOString().slice(0, 10)
+  const inMonth = (table, columns) =>
+    supabase.from(table).select(columns).gte('day', `${month}-01`).lt('day', nextMonth)
 
-// 1. Block access to backend files
-app.use((req, res, next) => {
-    const sensitiveFiles = ['server.js', 'package.json', 'package-lock.json', 'allocations.json', '.env'];
-    if (sensitiveFiles.some(file => req.url.includes(file))) {
-        return res.status(403).send('Forbidden');
-    }
-    next();
-});
+  const [people, allocations, comments] = await Promise.all([
+    supabase.from('people').select('id, name, color').order('id').throwOnError(),
+    inMonth('allocations', 'day, person_id').throwOnError(),
+    inMonth('comments', 'day, person_id, message, created_at').order('day').order('id').throwOnError(),
+  ])
+  res.json({
+    people: people.data,
+    allocations: Object.fromEntries(allocations.data.map((r) => [r.day, r.person_id])),
+    comments: comments.data,
+  })
+})
 
-// 2. Serve static frontend files (html, css, js)
-app.use(express.static(__dirname));
+app.put('/api/allocations/:day', async (req, res) => {
+  const { day } = req.params
+  const personId = req.body?.personId
+  if (!DAY.test(day) || !Number.isInteger(personId)) return res.sendStatus(400)
+  await supabase.from('allocations').upsert({ day, person_id: personId }).throwOnError()
+  res.sendStatus(204)
+})
 
-// --- DATA HELPERS ---
-const readData = () => {
-    try {
-        if (!fs.existsSync(DATA_FILE)) {
-            return [];
-        }
-        const data = fs.readFileSync(DATA_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (err) {
-        console.error("Error reading DB:", err);
-        return [];
-    }
-};
+app.delete('/api/allocations/:day', async (req, res) => {
+  const { day } = req.params
+  if (!DAY.test(day)) return res.sendStatus(400)
+  await supabase.from('allocations').delete().eq('day', day).throwOnError()
+  res.sendStatus(204)
+})
 
-const writeData = (data) => {
-    try {
-        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-        return true;
-    } catch (err) {
-        console.error("Error writing DB:", err);
-        return false;
-    }
-};
+app.post('/api/comments', async (req, res) => {
+  const { day, personId, message } = req.body ?? {}
+  const text = typeof message === 'string' ? message.trim() : ''
+  if (!DAY.test(day) || !Number.isInteger(personId) || !text || text.length > 1000) return res.sendStatus(400)
+  await supabase.from('comments').insert({ day, person_id: personId, message: text }).throwOnError()
+  res.sendStatus(201)
+})
 
-// --- API Endpoints ---
+// Ne renvoie jamais le détail d'une erreur au navigateur
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.sendStatus(err.status ?? 500)
+})
 
-app.get('/api/allocations', (req, res) => {
-    const data = readData();
-    res.json(data);
-});
-
-app.post('/api/allocations', (req, res) => {
-    const { date, personId } = req.body;
-    if (!date || !personId) return res.status(400).json({ error: 'Missing date or personId' });
-
-    let data = readData();
-    const index = data.findIndex(item => item[0] === date);
-    
-    if (index !== -1) {
-        data[index] = [date, personId];
-    } else {
-        data.push([date, personId]);
-    }
-
-    if (writeData(data)) res.json({ success: true });
-    else res.status(500).json({ error: 'Failed to save data' });
-});
-
-app.delete('/api/allocations', (req, res) => {
-    const { date } = req.body;
-    if (!date) return res.status(400).json({ error: 'Missing date' });
-
-    let data = readData();
-    const newData = data.filter(item => item[0] !== date);
-
-    if (writeData(newData)) res.json({ success: true });
-    else res.status(500).json({ error: 'Failed to save data' });
-});
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(process.env.PORT || 3000)
