@@ -120,11 +120,21 @@ export class Calendar {
           this.el('strong', '', person.name),
           ` · ${c.day.split('-').reverse().join('/')} · écrit le ${new Date(c.created_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}`,
         )
+        const remove = this.el('button', 'comment-delete', '×')
+        remove.ariaLabel = 'Supprimer ce commentaire'
+        remove.addEventListener('click', () => this.deleteComment(c.id))
         const li = this.el('li', 'comment')
-        li.append(head, this.el('p', '', c.message))
+        li.append(remove, head, this.el('p', '', c.message))
         return li
       }),
     )
+  }
+
+  deleteComment(id) {
+    if (!confirm('Es-tu sûre de vouloir supprimer ce commentaire ?')) return
+    this.comments = this.comments.filter((c) => c.id !== id)
+    this.renderComments()
+    this.request(`/api/comments/${id}`, 'DELETE').catch(() => this.load()) // échec : resynchronise avec la base
   }
 
   async addComment(e) {

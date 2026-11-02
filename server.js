@@ -21,7 +21,7 @@ app.get('/api/month/:month', async (req, res) => {
   const [people, allocations, comments] = await Promise.all([
     supabase.from('people').select('id, name, color').order('id').throwOnError(),
     inMonth('allocations', 'day, person_id').throwOnError(),
-    inMonth('comments', 'day, person_id, message, created_at').order('day').order('id').throwOnError(),
+    inMonth('comments', 'id, day, person_id, message, created_at').order('day').order('id').throwOnError(),
   ])
   res.json({
     people: people.data,
@@ -51,6 +51,13 @@ app.post('/api/comments', async (req, res) => {
   if (!DAY.test(day) || !Number.isInteger(personId) || !text || text.length > 1000) return res.sendStatus(400)
   await supabase.from('comments').insert({ day, person_id: personId, message: text }).throwOnError()
   res.sendStatus(201)
+})
+
+app.delete('/api/comments/:id', async (req, res) => {
+  const id = Number(req.params.id)
+  if (!Number.isInteger(id)) return res.sendStatus(400)
+  await supabase.from('comments').delete().eq('id', id).throwOnError()
+  res.sendStatus(204)
 })
 
 // Ne renvoie jamais le détail d'une erreur au navigateur
